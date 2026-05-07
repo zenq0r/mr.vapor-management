@@ -61,7 +61,7 @@
 
                 <div class="field">
                   <label for="cashPersonInCharge">Person In-Charge</label>
-                  <input id="cashPersonInCharge" type="text" placeholder="Person In-Charge">
+                  <input id="cashPersonInCharge" type="text" placeholder="Person In-Charge" autocomplete="name">
                 </div>
               </div>
 
@@ -215,6 +215,7 @@
           <div class="card-head">
             <h3 class="card-title">Return / Warranty Summary</h3>
           </div>
+
           <div id="cashReturnSummary" class="card-body return-summary"></div>
         </section>
 
@@ -304,12 +305,16 @@
     return cashPad(d.getHours()) + ':' + cashPad(d.getMinutes());
   }
 
+  function cashToDateInputValue(d){
+    return d.getFullYear() + '-' + cashPad(d.getMonth() + 1) + '-' + cashPad(d.getDate());
+  }
+
   function cashFormatDateInput(value){
     if(!value){
       return '-';
     }
 
-    const parts = value.split('-');
+    const parts = String(value).split('-');
 
     if(parts.length !== 3){
       return value;
@@ -329,12 +334,37 @@
 
   function cashSetAutoDateTime(){
     const now = new Date();
+
     cashEls.autoDate.value = cashFormatDate(now);
     cashEls.autoTime.value = cashFormatTime(now);
   }
 
+  function cashSetDefaultRange(){
+    const today = new Date();
+    const start = new Date(today);
+
+    start.setDate(today.getDate() - 6);
+
+    if(!cashEls.startDate.value){
+      cashEls.startDate.value = cashToDateInputValue(start);
+    }
+
+    if(!cashEls.endDate.value){
+      cashEls.endDate.value = cashToDateInputValue(today);
+    }
+  }
+
+  function cashCleanMoneyDigits(value){
+    return String(value || '0').replace(/\D/g, '') || '0';
+  }
+
+  function cashNormalizeMoneyDigits(value){
+    const clean = cashCleanMoneyDigits(value).replace(/^0+/, '') || '0';
+    return clean;
+  }
+
   function cashFormatMoneyFromDigits(digits){
-    const clean = String(digits || '0').replace(/\D/g, '') || '0';
+    const clean = cashNormalizeMoneyDigits(digits);
     return (parseInt(clean, 10) / 100).toFixed(2);
   }
 
@@ -384,9 +414,13 @@
     wrapper.appendChild(input);
   }
 
-  function cashSetupMoneyInput(input){
-    input.dataset.raw = input.value.replace(/\D/g, '') || '0';
+  function cashSetMoneyInputValue(input, rawDigits){
+    input.dataset.raw = cashNormalizeMoneyDigits(rawDigits);
     input.value = cashFormatMoneyFromDigits(input.dataset.raw);
+  }
+
+  function cashSetupMoneyInput(input){
+    cashSetMoneyInputValue(input, input.value);
 
     input.addEventListener('focus', function(){
       setTimeout(function(){
@@ -400,12 +434,10 @@
       if(key >= '0' && key <= '9'){
         e.preventDefault();
 
-        let raw = input.dataset.raw || '0';
-        raw = raw === '0' ? key : raw + key;
-        raw = raw.replace(/^0+/, '') || '0';
+        const currentRaw = input.dataset.raw || '0';
+        const nextRaw = currentRaw === '0' ? key : currentRaw + key;
 
-        input.dataset.raw = raw;
-        input.value = cashFormatMoneyFromDigits(raw);
+        cashSetMoneyInputValue(input, nextRaw);
         cashUpdateSalesCalculations();
         return;
       }
@@ -413,12 +445,10 @@
       if(key === 'Backspace'){
         e.preventDefault();
 
-        let raw = input.dataset.raw || '0';
-        raw = raw.length > 1 ? raw.slice(0, -1) : '0';
-        raw = raw.replace(/^0+/, '') || '0';
+        const currentRaw = input.dataset.raw || '0';
+        const nextRaw = currentRaw.length > 1 ? currentRaw.slice(0, -1) : '0';
 
-        input.dataset.raw = raw;
-        input.value = cashFormatMoneyFromDigits(raw);
+        cashSetMoneyInputValue(input, nextRaw);
         cashUpdateSalesCalculations();
         return;
       }
@@ -426,8 +456,7 @@
       if(key === 'Delete' || key === 'Escape'){
         e.preventDefault();
 
-        input.dataset.raw = '0';
-        input.value = '0.00';
+        cashSetMoneyInputValue(input, '0');
         cashUpdateSalesCalculations();
         return;
       }
@@ -440,11 +469,7 @@
     });
 
     input.addEventListener('input', function(){
-      let raw = input.value.replace(/\D/g, '') || '0';
-      raw = raw.replace(/^0+/, '') || '0';
-
-      input.dataset.raw = raw;
-      input.value = cashFormatMoneyFromDigits(raw);
+      cashSetMoneyInputValue(input, input.value);
 
       setTimeout(function(){
         input.setSelectionRange(input.value.length, input.value.length);
@@ -456,11 +481,8 @@
       e.preventDefault();
 
       const pasted = (e.clipboardData || window.clipboardData).getData('text');
-      let raw = String(pasted || '').replace(/\D/g, '') || '0';
-      raw = raw.replace(/^0+/, '') || '0';
 
-      input.dataset.raw = raw;
-      input.value = cashFormatMoneyFromDigits(raw);
+      cashSetMoneyInputValue(input, pasted);
       cashUpdateSalesCalculations();
     });
   }
@@ -490,6 +512,7 @@
   function cashCreateReturnItem(){
     const dateValue = cashEls.autoDate.value || cashFormatDate(new Date());
     const item = document.createElement('div');
+
     item.className = 'return-item';
 
     item.innerHTML = `
@@ -501,12 +524,12 @@
       <div class="grid-2">
         <div class="field">
           <label>Item</label>
-          <input type="text" class="cash-r-item" placeholder="Item Name">
+          <input type="text" class="cash-r-item" placeholder="Item Name" autocomplete="off">
         </div>
 
         <div class="field">
           <label>Reason</label>
-          <input type="text" class="cash-r-reason" placeholder="Reason">
+          <input type="text" class="cash-r-reason" placeholder="Reason" autocomplete="off">
         </div>
       </div>
 
@@ -518,13 +541,13 @@
 
         <div class="field">
           <label>Code</label>
-          <input type="text" class="cash-r-code" placeholder="Code">
+          <input type="text" class="cash-r-code" placeholder="Code" autocomplete="off">
         </div>
       </div>
 
       <div class="field">
         <label>Staff</label>
-        <input type="text" class="cash-r-staff" placeholder="Staff Name">
+        <input type="text" class="cash-r-staff" placeholder="Staff Name" autocomplete="off">
       </div>
     `;
 
@@ -537,7 +560,11 @@
     cashRefreshReturnIndexes();
 
     setTimeout(function(){
-      item.querySelector('.cash-r-item').focus();
+      const firstInput = item.querySelector('.cash-r-item');
+
+      if(firstInput){
+        firstInput.focus();
+      }
     }, 80);
   }
 
@@ -572,16 +599,19 @@
 
     if(!outlet){
       alert('Please select outlet.');
+      cashEls.outlet.focus();
       return false;
     }
 
     if(!personInCharge){
       alert('Please enter Person In-Charge.');
+      cashEls.personInCharge.focus();
       return false;
     }
 
     if(cashEls.startDate.value && cashEls.endDate.value && cashEls.startDate.value > cashEls.endDate.value){
       alert('End Date cannot be earlier than Start Date.');
+      cashEls.endDate.focus();
       return false;
     }
 
@@ -655,50 +685,35 @@ Staff: ${item.staff || '-'}
     return text;
   }
 
-  function cashGenerateReport(){
-    if(!cashValidateForm()){
-      return;
-    }
-
-    cashSetAutoDateTime();
-    cashUpdateSalesCalculations();
-
+  function cashCreateReportPayload(){
     const start = cashFormatDateInput(cashEls.startDate.value);
     const end = cashFormatDateInput(cashEls.endDate.value);
     const range = start + ' - ' + end;
 
-    const cashSales = cashEls.cashSales.value;
-    const bankSlip = cashEls.bankSlip.value;
-    const balanceSales = cashGetBalanceSales().toFixed(2);
-
-    const petty = cashEls.petty.value;
-    const claim = cashEls.claim.value;
-    const extra = cashEls.extra.value;
-
-    const returnItems = cashGetReturnItems();
-
-    const payload = {
+    return {
       outlet: cashEls.outlet.value.trim(),
       personInCharge: cashEls.personInCharge.value.trim(),
       date: cashEls.autoDate.value,
       time: cashEls.autoTime.value,
       range: range,
-      cashSales: cashSales,
-      bankSlip: bankSlip,
-      balanceSales: balanceSales,
-      petty: petty,
-      claim: claim,
-      extra: extra,
-      returnItems: returnItems
+      cashSales: cashEls.cashSales.value,
+      bankSlip: cashEls.bankSlip.value,
+      balanceSales: cashGetBalanceSales().toFixed(2),
+      petty: cashEls.petty.value,
+      claim: cashEls.claim.value,
+      extra: cashEls.extra.value,
+      returnItems: cashGetReturnItems()
     };
+  }
 
+  function cashShowSummaryPage(payload){
     const whatsappText = cashBuildWhatsappText(payload);
 
-    cashEls.sumSales.textContent = cashFormatRM(cashSales);
-    cashEls.sumBankSlip.textContent = cashFormatRM(bankSlip);
-    cashEls.sumBalanceSales.textContent = cashFormatRM(balanceSales);
+    cashEls.sumSales.textContent = cashFormatRM(payload.cashSales);
+    cashEls.sumBankSlip.textContent = cashFormatRM(payload.bankSlip);
+    cashEls.sumBalanceSales.textContent = cashFormatRM(payload.balanceSales);
 
-    cashUpdateReturnSummary(returnItems);
+    cashUpdateReturnSummary(payload.returnItems);
 
     cashEls.summaryText.textContent = whatsappText;
     cashEls.output.value = whatsappText;
@@ -713,9 +728,19 @@ Staff: ${item.staff || '-'}
     cashEls.heroCaption.textContent = 'Summary generated successfully. Please review before sharing to WhatsApp.';
 
     window.scrollTo({
-      top:0,
-      behavior:'smooth'
+      top: 0,
+      behavior: 'smooth'
     });
+  }
+
+  function cashGenerateReport(){
+    if(!cashValidateForm()){
+      return;
+    }
+
+    cashSetAutoDateTime();
+    cashUpdateSalesCalculations();
+    cashShowSummaryPage(cashCreateReportPayload());
   }
 
   function cashEditReport(){
@@ -730,8 +755,8 @@ Staff: ${item.staff || '-'}
     cashEls.heroCaption.textContent = 'A responsive reporting module designed for efficient tracking of sales banking, cash summary, bank slip records, and return/warranty records.';
 
     window.scrollTo({
-      top:0,
-      behavior:'smooth'
+      top: 0,
+      behavior: 'smooth'
     });
   }
 
@@ -746,23 +771,40 @@ Staff: ${item.staff || '-'}
     window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
   }
 
-  document.addEventListener('DOMContentLoaded', function(){
-    cashCacheEls();
-    cashSetAutoDateTime();
-
+  function cashBindEvents(){
     document.querySelectorAll('.cash-money-js').forEach(function(input){
       cashEnhanceMoneyInputUi(input);
       cashSetupMoneyInput(input);
     });
 
-    cashUpdateSalesCalculations();
-    cashRefreshReturnIndexes();
-
     cashEls.addReturnBtn.addEventListener('click', cashCreateReturnItem);
     cashEls.generateBtn.addEventListener('click', cashGenerateReport);
     cashEls.editBtn.addEventListener('click', cashEditReport);
     cashEls.shareBtn.addEventListener('click', cashShareWhatsapp);
-  });
+
+    cashEls.startDate.addEventListener('change', function(){
+      if(cashEls.endDate.value && cashEls.startDate.value > cashEls.endDate.value){
+        cashEls.endDate.value = cashEls.startDate.value;
+      }
+    });
+
+    cashEls.endDate.addEventListener('change', function(){
+      if(cashEls.startDate.value && cashEls.endDate.value < cashEls.startDate.value){
+        cashEls.startDate.value = cashEls.endDate.value;
+      }
+    });
+  }
+
+  function cashInit(){
+    cashCacheEls();
+    cashSetAutoDateTime();
+    cashSetDefaultRange();
+    cashBindEvents();
+    cashUpdateSalesCalculations();
+    cashRefreshReturnIndexes();
+  }
+
+  document.addEventListener('DOMContentLoaded', cashInit);
 })();
 </script>
 
