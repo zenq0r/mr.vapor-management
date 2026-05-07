@@ -1,0 +1,21 @@
+{
+  "name": "mr.vapor-management",
+  "version": "1.0.0",
+  "description": "MR. VAPOR Weekly Cash Report - A responsive reporting module for efficient tracking of sales banking, cash summary, bank slip records, and return/warranty records.",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'No build step required for vanilla HTML project'",
+    "lint": "echo 'No linter configured'",
+    "test": "echo 'No tests configured'"
+  },
+  "dependencies": {
+    "@vercel/speed-insights": "^1.0.14"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "vercel",
+    "speed-insights",
+    "analytics"
+  ]
+}
