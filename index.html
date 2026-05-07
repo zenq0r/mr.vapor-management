@@ -6,6 +6,18 @@
 <title>MR. VAPOR | Weekly Cash Report</title>
 
 <link rel="stylesheet" href="assets/css/mr-ui.css">
+
+<style>
+  #cashFormPage,
+  #cashSummaryPage{
+    content-visibility:auto;
+  }
+
+  #cashSummaryText,
+  #cashReturnSummary{
+    contain:content;
+  }
+</style>
 </head>
 
 <body>
@@ -713,7 +725,10 @@ ${cashBuildReturnWhatsappText(data.returnItems)}Checked By: ${data.personInCharg
     cashEls.output.value = whatsappText;
   }
 
-  function cashShowSummaryPage(){
+  function cashShowSummaryShell(){
+    cashEls.summaryText.textContent = 'Generating preview...';
+    cashEls.returnSummary.innerHTML = '<div class="empty-box">Preparing return / warranty summary...</div>';
+
     cashEls.formPage.classList.add('hidden');
     cashEls.summaryPage.classList.remove('hidden');
 
@@ -742,12 +757,15 @@ ${cashBuildReturnWhatsappText(data.returnItems)}Checked By: ${data.personInCharg
 
       const payload = cashCreateReportPayload();
 
-      cashApplySummary(payload);
-      cashShowSummaryPage();
+      cashShowSummaryShell();
+
+      window.requestAnimationFrame(function(){
+        cashApplySummary(payload);
+        cashSetGenerateBusy(false);
+      });
     }catch(error){
       console.error(error);
       alert('Unable to generate report. Please check your input and try again.');
-    }finally{
       cashSetGenerateBusy(false);
     }
   }
@@ -779,6 +797,10 @@ ${cashBuildReturnWhatsappText(data.returnItems)}Checked By: ${data.personInCharg
     cashEls.heroTitle.textContent = 'Weekly Cash Report';
     cashEls.heroCaption.textContent = 'A responsive reporting module designed for efficient tracking of sales banking, cash summary, bank slip records, and return/warranty records.';
 
+    cashEls.generateBtn.disabled = false;
+    cashEls.generateBtn.textContent = 'Generate Report';
+    cashGenerateBusy = false;
+
     window.scrollTo({
       top: 0,
       behavior: 'auto'
@@ -788,7 +810,7 @@ ${cashBuildReturnWhatsappText(data.returnItems)}Checked By: ${data.personInCharg
   function cashShareWhatsapp(){
     const text = cashEls.output.value;
 
-    if(!text){
+    if(!text || text === 'Generating preview...'){
       alert('Generate report first.');
       return;
     }
