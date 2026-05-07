@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MR. VAPOR | Weekly Cash Report</title>
+
+<link rel="stylesheet" href="assets/css/mr-ui.css">
+</head>
+
+<body>
+
+<div class="app" id="cashApp">
+  <div class="shell">
+
+    <section class="hero">
+      <div class="hero-logo-landscape">
+        <img
+          src="mr-vapor-logo.png"
+          alt="MR Vapor Logo"
+          onerror="this.style.display='none'; document.getElementById('cashLogoFallback').style.display='block';"
+        >
+        <div id="cashLogoFallback" class="logo-fallback">MR VAPOR</div>
+      </div>
+
+      <div class="hero-copy">
+        <h1 id="cashHeroTitle">Weekly Cash Report</h1>
+        <p id="cashHeroCaption">
+          A responsive reporting module designed for efficient tracking of sales banking, cash summary, bank slip records, and return/warranty records.
+        </p>
+      </div>
+    </section>
+
+    <div id="cashFormPage" class="page">
+      <div class="layout-wide">
+
+        <div class="stack">
+          <section class="card">
+            <div class="card-head">
+              <h3 class="card-title">Outlet Information</h3>
+            </div>
+
+            <div class="card-body">
+              <div class="report-info-grid">
+                <div class="field">
+                  <label for="cashOutlet">Outlet</label>
+                  <select id="cashOutlet">
+                    <option value="">Select Outlet</option>
+                    <option value="C180">C180</option>
+                    <option value="BALAKONG">BALAKONG</option>
+                    <option value="BMC">BMC</option>
+                    <option value="PRIMA SAUJANA">PRIMA SAUJANA</option>
+                    <option value="BANGI SEK 8">BANGI SEK 8</option>
+                    <option value="BANGI SEK 9">BANGI SEK 9</option>
+                    <option value="SEMENYIH CLC">SEMENYIH CLC</option>
+                    <option value="SEMENYIH PELANGI">SEMENYIH PELANGI</option>
+                    <option value="AMPANG">AMPANG</option>
+                    <option value="SG. BESI">SG. BESI</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="cashPersonInCharge">Person In-Charge</label>
+                  <input id="cashPersonInCharge" type="text" placeholder="Person In-Charge">
+                </div>
+              </div>
+
+              <div class="report-info-grid">
+                <div class="field">
+                  <label for="cashAutoDate">Date</label>
+                  <input id="cashAutoDate" readonly>
+                </div>
+
+                <div class="field">
+                  <label for="cashAutoTime">Time</label>
+                  <input id="cashAutoTime" readonly>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <h3 class="card-title">Report Range</h3>
+            </div>
+
+            <div class="card-body">
+              <div class="grid-2">
+                <div class="field">
+                  <label for="cashStartDate">Start Date</label>
+                  <input id="cashStartDate" type="date">
+                </div>
+
+                <div class="field">
+                  <label for="cashEndDate">End Date</label>
+                  <input id="cashEndDate" type="date">
+                </div>
+              </div>
+
+              <div class="helper-text">
+                Report range will be shown as DD/MM/YYYY inside WhatsApp Preview.
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="stack">
+          <section class="card">
+            <div class="card-head">
+              <h3 class="card-title">Sales Banking</h3>
+            </div>
+
+            <div class="card-body">
+              <div class="grid-2">
+                <div class="field">
+                  <label for="cashSales">Cash Sales / Total Sales (RM)</label>
+                  <input id="cashSales" class="money-input cash-money-js" type="text" inputmode="numeric" autocomplete="off" value="0.00">
+                </div>
+
+                <div class="field">
+                  <label for="cashBankSlip">Bank Slip (RM)</label>
+                  <input id="cashBankSlip" class="money-input cash-money-js" type="text" inputmode="numeric" autocomplete="off" value="0.00">
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <h3 class="card-title">Cash Summary</h3>
+            </div>
+
+            <div class="card-body">
+              <div class="grid-3">
+                <div class="field">
+                  <label for="cashPetty">Petty Cash (RM)</label>
+                  <input id="cashPetty" class="money-input cash-money-js" type="text" inputmode="numeric" autocomplete="off" value="0.00">
+                </div>
+
+                <div class="field">
+                  <label for="cashClaim">Claim (RM)</label>
+                  <input id="cashClaim" class="money-input cash-money-js" type="text" inputmode="numeric" autocomplete="off" value="0.00">
+                </div>
+
+                <div class="field">
+                  <label for="cashExtra">Extra Cash (RM)</label>
+                  <input id="cashExtra" class="money-input cash-money-js" type="text" inputmode="numeric" autocomplete="off" value="0.00">
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <h3 class="card-title">Return / Warranty</h3>
+            </div>
+
+            <div class="card-body">
+              <div id="cashEmptyReturnNote" class="empty-return">
+                No return / warranty item added.
+              </div>
+
+              <div id="cashReturnList" class="return-list"></div>
+
+              <button id="cashAddReturnBtn" class="secondary-btn light" type="button">+ Add Item</button>
+            </div>
+          </section>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="cashSummaryPage" class="page hidden">
+      <div class="summary-stack">
+
+        <section class="card">
+          <div class="card-head">
+            <h3 class="card-title">WhatsApp Preview</h3>
+          </div>
+
+          <div class="card-body">
+            <div id="cashSummaryText" class="preview-box"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h3 class="card-title">Sales Summary</h3>
+          </div>
+
+          <div class="card-body">
+            <div class="summary-grid">
+              <div class="summary-stat summary-sales">
+                <div class="summary-stat-label">Cash Sales</div>
+                <div id="cashSumSales" class="summary-stat-value">RM 0.00</div>
+                <div class="summary-stat-note">Total sales keyed in</div>
+              </div>
+
+              <div class="summary-stat summary-bank">
+                <div class="summary-stat-label">Bank Slip</div>
+                <div id="cashSumBankSlip" class="summary-stat-value">RM 0.00</div>
+                <div class="summary-stat-note">Bank in amount</div>
+              </div>
+
+              <div class="summary-stat summary-balance-sales" aria-disabled="true">
+                <div class="summary-stat-label">Balance Sales</div>
+                <div id="cashSumBalanceSales" class="summary-stat-value">RM 0.00</div>
+                <div class="summary-stat-note">Cash Sales - Bank Slip</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h3 class="card-title">Return / Warranty Summary</h3>
+          </div>
+          <div id="cashReturnSummary" class="card-body return-summary"></div>
+        </section>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sticky-bar">
+    <div class="sticky-inner">
+
+      <div id="cashFormActions" class="action-single">
+        <button id="cashGenerateBtn" class="primary-btn" type="button">Generate Report</button>
+        <div class="note">After generating, a summary will be shown before sharing to WhatsApp.</div>
+      </div>
+
+      <div id="cashSummaryActions" class="action-double hidden">
+        <button id="cashShareBtn" class="whatsapp-btn" type="button">Share WhatsApp</button>
+        <button id="cashEditBtn" class="edit-btn" type="button">Edit Report</button>
+      </div>
+
+    </div>
+  </div>
+
+  <textarea id="cashOutput" style="display:none;"></textarea>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  const cashEls = {};
+
+  function cashGetEl(id){
+    return document.getElementById(id);
+  }
+
+  function cashCacheEls(){
+    cashEls.formPage = cashGetEl('cashFormPage');
+    cashEls.summaryPage = cashGetEl('cashSummaryPage');
+
+    cashEls.outlet = cashGetEl('cashOutlet');
+    cashEls.personInCharge = cashGetEl('cashPersonInCharge');
+    cashEls.autoDate = cashGetEl('cashAutoDate');
+    cashEls.autoTime = cashGetEl('cashAutoTime');
+    cashEls.startDate = cashGetEl('cashStartDate');
+    cashEls.endDate = cashGetEl('cashEndDate');
+
+    cashEls.cashSales = cashGetEl('cashSales');
+    cashEls.bankSlip = cashGetEl('cashBankSlip');
+    cashEls.petty = cashGetEl('cashPetty');
+    cashEls.claim = cashGetEl('cashClaim');
+    cashEls.extra = cashGetEl('cashExtra');
+
+    cashEls.emptyReturnNote = cashGetEl('cashEmptyReturnNote');
+    cashEls.returnList = cashGetEl('cashReturnList');
+    cashEls.returnSummary = cashGetEl('cashReturnSummary');
+
+    cashEls.summaryText = cashGetEl('cashSummaryText');
+    cashEls.output = cashGetEl('cashOutput');
+
+    cashEls.sumSales = cashGetEl('cashSumSales');
+    cashEls.sumBankSlip = cashGetEl('cashSumBankSlip');
+    cashEls.sumBalanceSales = cashGetEl('cashSumBalanceSales');
+
+    cashEls.formActions = cashGetEl('cashFormActions');
+    cashEls.summaryActions = cashGetEl('cashSummaryActions');
+
+    cashEls.heroTitle = cashGetEl('cashHeroTitle');
+    cashEls.heroCaption = cashGetEl('cashHeroCaption');
+
+    cashEls.addReturnBtn = cashGetEl('cashAddReturnBtn');
+    cashEls.generateBtn = cashGetEl('cashGenerateBtn');
+    cashEls.shareBtn = cashGetEl('cashShareBtn');
+    cashEls.editBtn = cashGetEl('cashEditBtn');
+  }
+
+  function cashPad(num){
+    return String(num).padStart(2, '0');
+  }
+
+  function cashFormatDate(d){
+    return cashPad(d.getDate()) + '/' + cashPad(d.getMonth() + 1) + '/' + d.getFullYear();
+  }
+
+  function cashFormatTime(d){
+    return cashPad(d.getHours()) + ':' + cashPad(d.getMinutes());
+  }
+
+  function cashFormatDateInput(value){
+    if(!value){
+      return '-';
+    }
+
+    const parts = value.split('-');
+
+    if(parts.length !== 3){
+      return value;
+    }
+
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
+  }
+
+  function cashEscapeHtml(str){
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function cashSetAutoDateTime(){
+    const now = new Date();
+    cashEls.autoDate.value = cashFormatDate(now);
+    cashEls.autoTime.value = cashFormatTime(now);
+  }
+
+  function cashFormatMoneyFromDigits(digits){
+    const clean = String(digits || '0').replace(/\D/g, '') || '0';
+    return (parseInt(clean, 10) / 100).toFixed(2);
+  }
+
+  function cashValueToNumber(value){
+    const clean = String(value || '0').replace(/[^0-9.-]/g, '');
+    const parsed = Number(clean);
+
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  function cashFormatRM(value){
+    const amount = cashValueToNumber(value);
+    const prefix = amount < 0 ? '-RM ' : 'RM ';
+
+    return prefix + Math.abs(amount).toLocaleString('en-MY', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  function cashGetBalanceSales(){
+    return cashValueToNumber(cashEls.cashSales.value) - cashValueToNumber(cashEls.bankSlip.value);
+  }
+
+  function cashUpdateSalesCalculations(){
+    const balanceSales = cashGetBalanceSales();
+
+    cashEls.sumSales.textContent = cashFormatRM(cashEls.cashSales.value);
+    cashEls.sumBankSlip.textContent = cashFormatRM(cashEls.bankSlip.value);
+    cashEls.sumBalanceSales.textContent = cashFormatRM(balanceSales);
+  }
+
+  function cashEnhanceMoneyInputUi(input){
+    if(input.parentElement && input.parentElement.classList.contains('money-input-wrap')){
+      return;
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'money-input-wrap';
+
+    const prefix = document.createElement('span');
+    prefix.className = 'money-prefix';
+    prefix.textContent = 'RM';
+
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(prefix);
+    wrapper.appendChild(input);
+  }
+
+  function cashSetupMoneyInput(input){
+    input.dataset.raw = input.value.replace(/\D/g, '') || '0';
+    input.value = cashFormatMoneyFromDigits(input.dataset.raw);
+
+    input.addEventListener('focus', function(){
+      setTimeout(function(){
+        input.setSelectionRange(input.value.length, input.value.length);
+      }, 0);
+    });
+
+    input.addEventListener('keydown', function(e){
+      const key = e.key;
+
+      if(key >= '0' && key <= '9'){
+        e.preventDefault();
+
+        let raw = input.dataset.raw || '0';
+        raw = raw === '0' ? key : raw + key;
+        raw = raw.replace(/^0+/, '') || '0';
+
+        input.dataset.raw = raw;
+        input.value = cashFormatMoneyFromDigits(raw);
+        cashUpdateSalesCalculations();
+        return;
+      }
+
+      if(key === 'Backspace'){
+        e.preventDefault();
+
+        let raw = input.dataset.raw || '0';
+        raw = raw.length > 1 ? raw.slice(0, -1) : '0';
+        raw = raw.replace(/^0+/, '') || '0';
+
+        input.dataset.raw = raw;
+        input.value = cashFormatMoneyFromDigits(raw);
+        cashUpdateSalesCalculations();
+        return;
+      }
+
+      if(key === 'Delete' || key === 'Escape'){
+        e.preventDefault();
+
+        input.dataset.raw = '0';
+        input.value = '0.00';
+        cashUpdateSalesCalculations();
+        return;
+      }
+
+      if(key === 'Tab' || key === 'Enter' || key.startsWith('Arrow')){
+        return;
+      }
+
+      e.preventDefault();
+    });
+
+    input.addEventListener('input', function(){
+      let raw = input.value.replace(/\D/g, '') || '0';
+      raw = raw.replace(/^0+/, '') || '0';
+
+      input.dataset.raw = raw;
+      input.value = cashFormatMoneyFromDigits(raw);
+
+      setTimeout(function(){
+        input.setSelectionRange(input.value.length, input.value.length);
+        cashUpdateSalesCalculations();
+      }, 0);
+    });
+
+    input.addEventListener('paste', function(e){
+      e.preventDefault();
+
+      const pasted = (e.clipboardData || window.clipboardData).getData('text');
+      let raw = String(pasted || '').replace(/\D/g, '') || '0';
+      raw = raw.replace(/^0+/, '') || '0';
+
+      input.dataset.raw = raw;
+      input.value = cashFormatMoneyFromDigits(raw);
+      cashUpdateSalesCalculations();
+    });
+  }
+
+  function cashGetReturnCards(){
+    return Array.from(cashEls.returnList.querySelectorAll('.return-item'));
+  }
+
+  function cashRefreshReturnIndexes(){
+    const items = cashGetReturnCards();
+
+    items.forEach(function(item, index){
+      const title = item.querySelector('.return-index');
+
+      if(title){
+        title.textContent = 'Item ' + (index + 1);
+      }
+    });
+
+    if(items.length === 0){
+      cashEls.emptyReturnNote.classList.remove('hidden');
+    }else{
+      cashEls.emptyReturnNote.classList.add('hidden');
+    }
+  }
+
+  function cashCreateReturnItem(){
+    const dateValue = cashEls.autoDate.value || cashFormatDate(new Date());
+    const item = document.createElement('div');
+    item.className = 'return-item';
+
+    item.innerHTML = `
+      <div class="return-top">
+        <div class="return-index">Item</div>
+        <button type="button" class="remove-btn" aria-label="Remove" title="Remove">×</button>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label>Item</label>
+          <input type="text" class="cash-r-item" placeholder="Item Name">
+        </div>
+
+        <div class="field">
+          <label>Reason</label>
+          <input type="text" class="cash-r-reason" placeholder="Reason">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label>Date</label>
+          <input type="text" class="cash-r-date" value="${cashEscapeHtml(dateValue)}" readonly>
+        </div>
+
+        <div class="field">
+          <label>Code</label>
+          <input type="text" class="cash-r-code" placeholder="Code">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Staff</label>
+        <input type="text" class="cash-r-staff" placeholder="Staff Name">
+      </div>
+    `;
+
+    item.querySelector('.remove-btn').addEventListener('click', function(){
+      item.remove();
+      cashRefreshReturnIndexes();
+    });
+
+    cashEls.returnList.appendChild(item);
+    cashRefreshReturnIndexes();
+
+    setTimeout(function(){
+      item.querySelector('.cash-r-item').focus();
+    }, 80);
+  }
+
+  function cashGetReturnItems(){
+    const items = cashGetReturnCards();
+    const results = [];
+
+    items.forEach(function(item){
+      const itemName = item.querySelector('.cash-r-item').value.trim();
+      const reason = item.querySelector('.cash-r-reason').value.trim();
+      const date = item.querySelector('.cash-r-date').value.trim();
+      const code = item.querySelector('.cash-r-code').value.trim();
+      const staff = item.querySelector('.cash-r-staff').value.trim();
+
+      if(itemName || reason || code || staff){
+        results.push({
+          itemName: itemName,
+          reason: reason,
+          date: date,
+          code: code,
+          staff: staff
+        });
+      }
+    });
+
+    return results;
+  }
+
+  function cashValidateForm(){
+    const outlet = cashEls.outlet.value.trim();
+    const personInCharge = cashEls.personInCharge.value.trim();
+
+    if(!outlet){
+      alert('Please select outlet.');
+      return false;
+    }
+
+    if(!personInCharge){
+      alert('Please enter Person In-Charge.');
+      return false;
+    }
+
+    if(cashEls.startDate.value && cashEls.endDate.value && cashEls.startDate.value > cashEls.endDate.value){
+      alert('End Date cannot be earlier than Start Date.');
+      return false;
+    }
+
+    return true;
+  }
+
+  function cashUpdateReturnSummary(items){
+    if(items.length === 0){
+      cashEls.returnSummary.innerHTML = '<div class="empty-box">No return / warranty item added.</div>';
+      return;
+    }
+
+    let html = '';
+
+    items.forEach(function(item, index){
+      html += `
+        <div class="summary-item">
+          <h4>Item ${index + 1}</h4>
+          <p><strong>Item:</strong> ${cashEscapeHtml(item.itemName || '-')}</p>
+          <p><strong>Reason:</strong> ${cashEscapeHtml(item.reason || '-')}</p>
+          <p><strong>Date:</strong> ${cashEscapeHtml(item.date || '-')}</p>
+          <p><strong>Code:</strong> ${cashEscapeHtml(item.code || '-')}</p>
+          <p><strong>Staff:</strong> ${cashEscapeHtml(item.staff || '-')}</p>
+        </div>
+      `;
+    });
+
+    cashEls.returnSummary.innerHTML = html;
+  }
+
+  function cashBuildWhatsappText(data){
+    let text =
+`*MR VAPOR WEEKLY CASH REPORT*
+
+Outlet: ${data.outlet}
+Date: ${data.date}
+Time: ${data.time}
+Range: ${data.range}
+
+*Sales Banking*
+Cash Sales: RM ${data.cashSales}
+Bank Slip: RM ${data.bankSlip}
+Balance Sales: RM ${data.balanceSales}
+
+*Cash Summary*
+Petty Cash: RM ${data.petty}
+Claim: RM ${data.claim}
+Extra Cash: RM ${data.extra}
+
+*Item Issued List For Return / Warranty*
+
+`;
+
+    if(data.returnItems.length === 0){
+      text += 'No return / warranty item.\n\n';
+    }else{
+      data.returnItems.forEach(function(item, index){
+        text +=
+`${index + 1}. Item: ${item.itemName || '-'}
+Reason: ${item.reason || '-'}
+Date: ${item.date || '-'}
+Code: ${item.code || '-'}
+Staff: ${item.staff || '-'}
+
+`;
+      });
+    }
+
+    text += `Checked By: ${data.personInCharge}`;
+
+    return text;
+  }
+
+  function cashGenerateReport(){
+    if(!cashValidateForm()){
+      return;
+    }
+
+    cashSetAutoDateTime();
+    cashUpdateSalesCalculations();
+
+    const start = cashFormatDateInput(cashEls.startDate.value);
+    const end = cashFormatDateInput(cashEls.endDate.value);
+    const range = start + ' - ' + end;
+
+    const cashSales = cashEls.cashSales.value;
+    const bankSlip = cashEls.bankSlip.value;
+    const balanceSales = cashGetBalanceSales().toFixed(2);
+
+    const petty = cashEls.petty.value;
+    const claim = cashEls.claim.value;
+    const extra = cashEls.extra.value;
+
+    const returnItems = cashGetReturnItems();
+
+    const payload = {
+      outlet: cashEls.outlet.value.trim(),
+      personInCharge: cashEls.personInCharge.value.trim(),
+      date: cashEls.autoDate.value,
+      time: cashEls.autoTime.value,
+      range: range,
+      cashSales: cashSales,
+      bankSlip: bankSlip,
+      balanceSales: balanceSales,
+      petty: petty,
+      claim: claim,
+      extra: extra,
+      returnItems: returnItems
+    };
+
+    const whatsappText = cashBuildWhatsappText(payload);
+
+    cashEls.sumSales.textContent = cashFormatRM(cashSales);
+    cashEls.sumBankSlip.textContent = cashFormatRM(bankSlip);
+    cashEls.sumBalanceSales.textContent = cashFormatRM(balanceSales);
+
+    cashUpdateReturnSummary(returnItems);
+
+    cashEls.summaryText.textContent = whatsappText;
+    cashEls.output.value = whatsappText;
+
+    cashEls.formPage.classList.add('hidden');
+    cashEls.summaryPage.classList.remove('hidden');
+
+    cashEls.formActions.classList.add('hidden');
+    cashEls.summaryActions.classList.remove('hidden');
+
+    cashEls.heroTitle.classList.add('hidden');
+    cashEls.heroCaption.textContent = 'Summary generated successfully. Please review before sharing to WhatsApp.';
+
+    window.scrollTo({
+      top:0,
+      behavior:'smooth'
+    });
+  }
+
+  function cashEditReport(){
+    cashEls.summaryPage.classList.add('hidden');
+    cashEls.formPage.classList.remove('hidden');
+
+    cashEls.summaryActions.classList.add('hidden');
+    cashEls.formActions.classList.remove('hidden');
+
+    cashEls.heroTitle.classList.remove('hidden');
+    cashEls.heroTitle.textContent = 'Weekly Cash Report';
+    cashEls.heroCaption.textContent = 'A responsive reporting module designed for efficient tracking of sales banking, cash summary, bank slip records, and return/warranty records.';
+
+    window.scrollTo({
+      top:0,
+      behavior:'smooth'
+    });
+  }
+
+  function cashShareWhatsapp(){
+    const text = cashEls.output.value;
+
+    if(!text){
+      alert('Generate report first.');
+      return;
+    }
+
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    cashCacheEls();
+    cashSetAutoDateTime();
+
+    document.querySelectorAll('.cash-money-js').forEach(function(input){
+      cashEnhanceMoneyInputUi(input);
+      cashSetupMoneyInput(input);
+    });
+
+    cashUpdateSalesCalculations();
+    cashRefreshReturnIndexes();
+
+    cashEls.addReturnBtn.addEventListener('click', cashCreateReturnItem);
+    cashEls.generateBtn.addEventListener('click', cashGenerateReport);
+    cashEls.editBtn.addEventListener('click', cashEditReport);
+    cashEls.shareBtn.addEventListener('click', cashShareWhatsapp);
+  });
+})();
+</script>
+
+</body>
+</html>
