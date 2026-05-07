@@ -22,10 +22,10 @@
 
 <body>
 
-<div class="app" id="cashApp">
+<main class="app" id="cashApp" aria-labelledby="cashHeroTitle">
   <div class="shell">
 
-    <section class="hero">
+    <section class="hero" aria-labelledby="cashHeroTitle">
       <div class="hero-logo-landscape">
         <img
           src="mr-vapor-logo.png"
@@ -47,9 +47,9 @@
       <div class="layout-wide">
 
         <div class="stack">
-          <section class="card">
+          <section class="card" aria-labelledby="cashOutletInfoTitle">
             <div class="card-head">
-              <h3 class="card-title">Outlet Information</h3>
+              <h2 id="cashOutletInfoTitle" class="card-title">Outlet Information</h2>
             </div>
 
             <div class="card-body">
@@ -91,9 +91,9 @@
             </div>
           </section>
 
-          <section class="card">
+          <section class="card" aria-labelledby="cashReportRangeTitle">
             <div class="card-head">
-              <h3 class="card-title">Report Range</h3>
+              <h2 id="cashReportRangeTitle" class="card-title">Report Range</h2>
             </div>
 
             <div class="card-body">
@@ -117,9 +117,9 @@
         </div>
 
         <div class="stack">
-          <section class="card">
+          <section class="card" aria-labelledby="cashSalesBankingTitle">
             <div class="card-head">
-              <h3 class="card-title">Sales Banking</h3>
+              <h2 id="cashSalesBankingTitle" class="card-title">Sales Banking</h2>
             </div>
 
             <div class="card-body">
@@ -137,9 +137,9 @@
             </div>
           </section>
 
-          <section class="card">
+          <section class="card" aria-labelledby="cashSummaryTitle">
             <div class="card-head">
-              <h3 class="card-title">Cash Summary</h3>
+              <h2 id="cashSummaryTitle" class="card-title">Cash Summary</h2>
             </div>
 
             <div class="card-body">
@@ -162,9 +162,9 @@
             </div>
           </section>
 
-          <section class="card">
+          <section class="card" aria-labelledby="cashReturnWarrantyTitle">
             <div class="card-head">
-              <h3 class="card-title">Return / Warranty</h3>
+              <h2 id="cashReturnWarrantyTitle" class="card-title">Return / Warranty</h2>
             </div>
 
             <div class="card-body">
@@ -185,9 +185,9 @@
     <div id="cashSummaryPage" class="page hidden">
       <div class="summary-stack">
 
-        <section class="card">
+        <section class="card" aria-labelledby="cashWhatsappPreviewTitle">
           <div class="card-head">
-            <h3 class="card-title">WhatsApp Preview</h3>
+            <h2 id="cashWhatsappPreviewTitle" class="card-title">WhatsApp Preview</h2>
           </div>
 
           <div class="card-body">
@@ -195,9 +195,9 @@
           </div>
         </section>
 
-        <section class="card">
+        <section class="card" aria-labelledby="cashSalesSummaryTitle">
           <div class="card-head">
-            <h3 class="card-title">Sales Summary</h3>
+            <h2 id="cashSalesSummaryTitle" class="card-title">Sales Summary</h2>
           </div>
 
           <div class="card-body">
@@ -223,9 +223,9 @@
           </div>
         </section>
 
-        <section class="card">
+        <section class="card" aria-labelledby="cashReturnSummaryTitle">
           <div class="card-head">
-            <h3 class="card-title">Return / Warranty Summary</h3>
+            <h2 id="cashReturnSummaryTitle" class="card-title">Return / Warranty Summary</h2>
           </div>
 
           <div id="cashReturnSummary" class="card-body return-summary"></div>
@@ -253,7 +253,7 @@
   </div>
 
   <textarea id="cashOutput" style="display:none;"></textarea>
-</div>
+</main>
 
 <script>
 (function(){
@@ -534,7 +534,7 @@
     item.innerHTML = `
       <div class="return-top">
         <div class="return-index">Item</div>
-        <button type="button" class="remove-btn" aria-label="Remove" title="Remove">×</button>
+        <button type="button" class="remove-btn" aria-label="Remove" title="Remove">x</button>
       </div>
 
       <div class="grid-2">
@@ -642,7 +642,7 @@
     return items.map(function(item, index){
       return `
         <div class="summary-item">
-          <h4>Item ${index + 1}</h4>
+          <h3>Item ${index + 1}</h3>
           <p><strong>Item:</strong> ${cashEscapeHtml(item.itemName || '-')}</p>
           <p><strong>Reason:</strong> ${cashEscapeHtml(item.reason || '-')}</p>
           <p><strong>Date:</strong> ${cashEscapeHtml(item.date || '-')}</p>
@@ -735,7 +735,8 @@ ${cashBuildReturnWhatsappText(data.returnItems)}Checked By: ${data.personInCharg
     cashEls.formActions.classList.add('hidden');
     cashEls.summaryActions.classList.remove('hidden');
 
-    cashEls.heroTitle.classList.add('hidden');
+    cashEls.heroTitle.classList.remove('hidden');
+    cashEls.heroTitle.textContent = 'Weekly Cash Report Summary';
     cashEls.heroCaption.textContent = 'Summary generated successfully. Please review before sharing to WhatsApp.';
 
     window.scrollTo({
