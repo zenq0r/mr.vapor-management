@@ -248,12 +248,15 @@
   'use strict';
 
   const cashEls = {};
+  let cashGenerateBusy = false;
 
   function cashGetEl(id){
     return document.getElementById(id);
   }
 
   function cashCacheEls(){
+    cashEls.app = cashGetEl('cashApp');
+
     cashEls.formPage = cashGetEl('cashFormPage');
     cashEls.summaryPage = cashGetEl('cashSummaryPage');
 
@@ -297,16 +300,20 @@
     return String(num).padStart(2, '0');
   }
 
+  function cashToDateInputValue(date){
+    return [
+      date.getFullYear(),
+      cashPad(date.getMonth() + 1),
+      cashPad(date.getDate())
+    ].join('-');
+  }
+
   function cashFormatDate(d){
     return cashPad(d.getDate()) + '/' + cashPad(d.getMonth() + 1) + '/' + d.getFullYear();
   }
 
   function cashFormatTime(d){
     return cashPad(d.getHours()) + ':' + cashPad(d.getMinutes());
-  }
-
-  function cashToDateInputValue(d){
-    return d.getFullYear() + '-' + cashPad(d.getMonth() + 1) + '-' + cashPad(d.getDate());
   }
 
   function cashFormatDateInput(value){
@@ -339,7 +346,7 @@
     cashEls.autoTime.value = cashFormatTime(now);
   }
 
-  function cashSetDefaultRange(){
+  function cashSetDefaultReportRange(){
     const today = new Date();
     const start = new Date(today);
 
@@ -358,19 +365,20 @@
     return String(value || '0').replace(/\D/g, '') || '0';
   }
 
-  function cashNormalizeMoneyDigits(value){
-    const clean = cashCleanMoneyDigits(value).replace(/^0+/, '') || '0';
-    return clean;
+  function cashNormalizeRawDigits(raw){
+    raw = cashCleanMoneyDigits(raw);
+    raw = raw.replace(/^0+/, '') || '0';
+
+    return raw;
   }
 
   function cashFormatMoneyFromDigits(digits){
-    const clean = cashNormalizeMoneyDigits(digits);
+    const clean = cashNormalizeRawDigits(digits);
     return (parseInt(clean, 10) / 100).toFixed(2);
   }
 
   function cashValueToNumber(value){
-    const clean = String(value || '0').replace(/[^0-9.-]/g, '');
-    const parsed = Number(clean);
+    const parsed = Number(String(value || '0').replace(/[^0-9.-]/g, ''));
 
     return Number.isFinite(parsed) ? parsed : 0;
   }
@@ -415,7 +423,7 @@
   }
 
   function cashSetMoneyInputValue(input, rawDigits){
-    input.dataset.raw = cashNormalizeMoneyDigits(rawDigits);
+    input.dataset.raw = cashNormalizeRawDigits(rawDigits);
     input.value = cashFormatMoneyFromDigits(input.dataset.raw);
   }
 
@@ -471,10 +479,10 @@
     input.addEventListener('input', function(){
       cashSetMoneyInputValue(input, input.value);
 
-      setTimeout(function(){
+      window.requestAnimationFrame(function(){
         input.setSelectionRange(input.value.length, input.value.length);
         cashUpdateSalesCalculations();
-      }, 0);
+      });
     });
 
     input.addEventListener('paste', function(e){
@@ -502,11 +510,7 @@
       }
     });
 
-    if(items.length === 0){
-      cashEls.emptyReturnNote.classList.remove('hidden');
-    }else{
-      cashEls.emptyReturnNote.classList.add('hidden');
-    }
+    cashEls.emptyReturnNote.classList.toggle('hidden', items.length > 0);
   }
 
   function cashCreateReturnItem(){
@@ -569,15 +573,15 @@
   }
 
   function cashGetReturnItems(){
-    const items = cashGetReturnCards();
+    const cards = cashGetReturnCards();
     const results = [];
 
-    items.forEach(function(item){
-      const itemName = item.querySelector('.cash-r-item').value.trim();
-      const reason = item.querySelector('.cash-r-reason').value.trim();
-      const date = item.querySelector('.cash-r-date').value.trim();
-      const code = item.querySelector('.cash-r-code').value.trim();
-      const staff = item.querySelector('.cash-r-staff').value.trim();
+    cards.forEach(function(card){
+      const itemName = card.querySelector('.cash-r-item').value.trim();
+      const reason = card.querySelector('.cash-r-reason').value.trim();
+      const date = card.querySelector('.cash-r-date').value.trim();
+      const code = card.querySelector('.cash-r-code').value.trim();
+      const staff = card.querySelector('.cash-r-staff').value.trim();
 
       if(itemName || reason || code || staff){
         results.push({
@@ -618,16 +622,13 @@
     return true;
   }
 
-  function cashUpdateReturnSummary(items){
+  function cashBuildReturnSummaryHtml(items){
     if(items.length === 0){
-      cashEls.returnSummary.innerHTML = '<div class="empty-box">No return / warranty item added.</div>';
-      return;
+      return '<div class="empty-box">No return / warranty item added.</div>';
     }
 
-    let html = '';
-
-    items.forEach(function(item, index){
-      html += `
+    return items.map(function(item, index){
+      return `
         <div class="summary-item">
           <h4>Item ${index + 1}</h4>
           <p><strong>Item:</strong> ${cashEscapeHtml(item.itemName || '-')}</p>
@@ -637,14 +638,27 @@
           <p><strong>Staff:</strong> ${cashEscapeHtml(item.staff || '-')}</p>
         </div>
       `;
-    });
+    }).join('');
+  }
 
-    cashEls.returnSummary.innerHTML = html;
+  function cashBuildReturnWhatsappText(items){
+    if(items.length === 0){
+      return 'No return / warranty item.\n\n';
+    }
+
+    return items.map(function(item, index){
+      return `${index + 1}. Item: ${item.itemName || '-'}
+Reason: ${item.reason || '-'}
+Date: ${item.date || '-'}
+Code: ${item.code || '-'}
+Staff: ${item.staff || '-'}
+
+`;
+    }).join('');
   }
 
   function cashBuildWhatsappText(data){
-    let text =
-`*MR VAPOR WEEKLY CASH REPORT*
+    return `*MR VAPOR WEEKLY CASH REPORT*
 
 Outlet: ${data.outlet}
 Date: ${data.date}
@@ -663,39 +677,19 @@ Extra Cash: RM ${data.extra}
 
 *Item Issued List For Return / Warranty*
 
-`;
-
-    if(data.returnItems.length === 0){
-      text += 'No return / warranty item.\n\n';
-    }else{
-      data.returnItems.forEach(function(item, index){
-        text +=
-`${index + 1}. Item: ${item.itemName || '-'}
-Reason: ${item.reason || '-'}
-Date: ${item.date || '-'}
-Code: ${item.code || '-'}
-Staff: ${item.staff || '-'}
-
-`;
-      });
-    }
-
-    text += `Checked By: ${data.personInCharge}`;
-
-    return text;
+${cashBuildReturnWhatsappText(data.returnItems)}Checked By: ${data.personInCharge}`;
   }
 
   function cashCreateReportPayload(){
     const start = cashFormatDateInput(cashEls.startDate.value);
     const end = cashFormatDateInput(cashEls.endDate.value);
-    const range = start + ' - ' + end;
 
     return {
       outlet: cashEls.outlet.value.trim(),
       personInCharge: cashEls.personInCharge.value.trim(),
       date: cashEls.autoDate.value,
       time: cashEls.autoTime.value,
-      range: range,
+      range: start + ' - ' + end,
       cashSales: cashEls.cashSales.value,
       bankSlip: cashEls.bankSlip.value,
       balanceSales: cashGetBalanceSales().toFixed(2),
@@ -706,18 +700,20 @@ Staff: ${item.staff || '-'}
     };
   }
 
-  function cashShowSummaryPage(payload){
+  function cashApplySummary(payload){
     const whatsappText = cashBuildWhatsappText(payload);
 
     cashEls.sumSales.textContent = cashFormatRM(payload.cashSales);
     cashEls.sumBankSlip.textContent = cashFormatRM(payload.bankSlip);
     cashEls.sumBalanceSales.textContent = cashFormatRM(payload.balanceSales);
 
-    cashUpdateReturnSummary(payload.returnItems);
+    cashEls.returnSummary.innerHTML = cashBuildReturnSummaryHtml(payload.returnItems);
 
     cashEls.summaryText.textContent = whatsappText;
     cashEls.output.value = whatsappText;
+  }
 
+  function cashShowSummaryPage(){
     cashEls.formPage.classList.add('hidden');
     cashEls.summaryPage.classList.remove('hidden');
 
@@ -729,18 +725,47 @@ Staff: ${item.staff || '-'}
 
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: 'auto'
     });
   }
 
+  function cashSetGenerateBusy(isBusy){
+    cashGenerateBusy = isBusy;
+    cashEls.generateBtn.disabled = isBusy;
+    cashEls.generateBtn.textContent = isBusy ? 'Generating...' : 'Generate Report';
+  }
+
+  function cashRunGenerateReport(){
+    try{
+      cashSetAutoDateTime();
+      cashUpdateSalesCalculations();
+
+      const payload = cashCreateReportPayload();
+
+      cashApplySummary(payload);
+      cashShowSummaryPage();
+    }catch(error){
+      console.error(error);
+      alert('Unable to generate report. Please check your input and try again.');
+    }finally{
+      cashSetGenerateBusy(false);
+    }
+  }
+
   function cashGenerateReport(){
+    if(cashGenerateBusy){
+      return;
+    }
+
     if(!cashValidateForm()){
       return;
     }
 
-    cashSetAutoDateTime();
-    cashUpdateSalesCalculations();
-    cashShowSummaryPage(cashCreateReportPayload());
+    cashSetGenerateBusy(true);
+
+    window.requestAnimationFrame(function(){
+      setTimeout(cashRunGenerateReport, 0);
+    });
   }
 
   function cashEditReport(){
@@ -756,7 +781,7 @@ Staff: ${item.staff || '-'}
 
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: 'auto'
     });
   }
 
@@ -798,7 +823,7 @@ Staff: ${item.staff || '-'}
   function cashInit(){
     cashCacheEls();
     cashSetAutoDateTime();
-    cashSetDefaultRange();
+    cashSetDefaultReportRange();
     cashBindEvents();
     cashUpdateSalesCalculations();
     cashRefreshReturnIndexes();
