@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MR. VAPOR | Stock Check Report</title>
+
+<style>
+:root{
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+  --shadow:0 14px 40px rgba(0,0,0,0.12);
+  --radius:22px;
+  --red:#dc2626;
+  --red-dark:#991b1b;
+  --green:#16a34a;
+  --dark:#111827;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+  -webkit-text-size-adjust:100%;
+}
+
+body{
+  margin:0;
+  font-family:Inter, Arial, Helvetica, sans-serif;
+  background:radial-gradient(circle at top, #1b1c25 0%, #0b0b0f 42%, #07070a 100%);
+  color:#fff;
+}
+
+button,
+input,
+select,
+textarea{
+  font:inherit;
+}
+
+button{
+  -webkit-tap-highlight-color:transparent;
+}
+
+img{
+  max-width:100%;
+  display:block;
+}
+
+.app{
+  width:100%;
+  min-height:100vh;
+}
+
+.shell{
+  width:min(100%, 1220px);
+  margin:0 auto;
+  padding:18px 14px 112px;
+}
+
+.hero{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(145deg, rgba(15,23,42,0.94), rgba(17,24,39,0.98));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:28px;
+  padding:18px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.28);
+  margin-bottom:18px;
+  text-align:center;
+}
+
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:auto -90px -90px auto;
+  width:240px;
+  height:240px;
+  background:radial-gradient(circle, rgba(239,68,68,0.22), transparent 70%);
+  pointer-events:none;
+}
+
+.logo-box{
+  position:relative;
+  width:100%;
+  max-width:820px;
+  margin:0 auto;
+  background:#000;
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:22px;
+  padding:10px;
+  min-height:120px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.logo-box img{
+  width:100%;
+  max-height:180px;
+  object-fit:contain;
+}
+
+.logo-fallback{
+  display:none;
+  color:#fff;
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:0.12em;
+}
+
+.hero-copy{
+  position:relative;
+  margin:14px auto 0;
+  max-width:760px;
+  text-align:center;
+}
+
+.hero-copy h1{
+  margin:0 0 8px;
+  font-size:clamp(23px, 4vw, 38px);
+  line-height:1.05;
+  letter-spacing:-0.03em;
+}
+
+.hero-copy p{
+  margin:0;
+  color:rgba(255,255,255,0.72);
+  font-size:12px;
+  line-height:1.5;
+}
+
+.hidden{
+  display:none !important;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:360px minmax(0, 1fr);
+  gap:18px;
+}
+
+.stack,
+.summary-stack{
+  display:grid;
+  gap:18px;
+}
+
+.card{
+  background:var(--card);
+  color:var(--text);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  border:1px solid rgba(255,255,255,0.65);
+  overflow:hidden;
+}
+
+.card-head{
+  padding:16px 18px 0;
+}
+
+.card-title{
+  margin:0;
+  font-size:11px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:0.09em;
+  color:var(--muted);
+}
+
+.card-body{
+  padding:18px;
+}
+
+.grid-2{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:12px;
+}
+
+.grid-3{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:12px;
+}
+
+.report-info-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+  gap:12px;
+  align-items:end;
+  margin-bottom:14px;
+}
+
+.report-info-grid .field{
+  margin-bottom:0;
+}
+
+.field{
+  margin-bottom:14px;
+}
+
+.field:last-child{
+  margin-bottom:0;
+}
+
+label{
+  display:block;
+  margin-bottom:7px;
+  font-size:10.5px;
+  font-weight:800;
+  color:var(--muted);
+  letter-spacing:0.03em;
+}
+
+input,
+select{
+  width:100%;
+  height:48px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  border-radius:14px;
+  padding:0 14px;
+  font-size:14px;
+  outline:none;
+  transition:border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+input::placeholder{
+  color:#6b7280;
+  opacity:1;
+}
+
+input:focus,
+select:focus{
+  border-color:#111827;
+  box-shadow:0 0 0 4px rgba(17,24,39,0.08);
+}
+
+input[readonly]{
+  background:#f3f4f6;
+  color:#4b5563;
+}
+
+button:disabled{
+  opacity:0.55;
+  cursor:not-allowed;
+}
+
+.helper-text{
+  font-size:10.5px;
+  color:#6b7280;
+  line-height:1.45;
+}
+
+.primary-btn,
+.secondary-btn,
+.whatsapp-btn,
+.edit-btn{
+  width:100%;
+  border:none;
+  border-radius:16px;
+  padding:13px 15px;
+  font-size:13px;
+  font-weight:850;
+  cursor:pointer;
+  line-height:1.2;
+  transition:transform 0.16s ease, opacity 0.16s ease, box-shadow 0.16s ease;
+}
+
+.primary-btn:active,
+.secondary-btn:active,
+.whatsapp-btn:active,
+.edit-btn:active,
+.remove-btn:active{
+  transform:scale(0.985);
+}
+
+.secondary-btn{
+  background:#f3f4f6;
+  color:#111827;
+}
+
+.primary-btn{
+  background:linear-gradient(145deg, #ef4444, #dc2626);
+  color:#fff;
+  box-shadow:0 10px 28px rgba(239,68,68,0.28);
+}
+
+.whatsapp-btn{
+  background:linear-gradient(145deg, #22c55e, #16a34a);
+  color:#fff;
+  box-shadow:0 10px 28px rgba(34,197,94,0.26);
+}
+
+.edit-btn{
+  background:#f3f4f6;
+  color:#111827;
+}
+
+.items-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.item-list{
+  display:grid;
+  gap:14px;
+}
+
+.item-card{
+  background:#fafafa;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px;
+}
+
+.item-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.item-index{
+  font-size:13px;
+  font-weight:900;
+  color:#111827;
+}
+
+.remove-btn{
+  min-width:28px;
+  border:none;
+  background:transparent;
+  color:#be123c;
+  padding:0 4px;
+  border-radius:8px;
+  font-size:25px;
+  line-height:1;
+  font-weight:900;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.remove-btn:hover{
+  color:#7f1d1d;
+}
+
+.qty-input{
+  text-align:center;
+  font-weight:900;
+}
+
+.diff-box,
+.status-box{
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:0 14px;
+  background:#f9fafb;
+  font-size:13px;
+  font-weight:900;
+}
+
+.status-box{
+  justify-content:flex-start;
+}
+
+.diff-zero{
+  color:#111827;
+}
+
+.diff-pos{
+  color:#166534;
+  background:#ecfdf5;
+  border-color:#bbf7d0;
+}
+
+.diff-neg{
+  color:#991b1b;
+  background:#fef2f2;
+  border-color:#fecaca;
+}
+
+.status-ok{
+  color:#166534;
+  background:#ecfdf5;
+  border-color:#bbf7d0;
+}
+
+.status-bad{
+  color:#991b1b;
+  background:#fef2f2;
+  border-color:#fecaca;
+}
+
+.empty-item{
+  background:#f9fafb;
+  border:1px dashed #d1d5db;
+  color:#6b7280;
+  border-radius:16px;
+  padding:13px;
+  font-size:11.5px;
+}
+
+.preview-box{
+  background:#0f172a;
+  color:#e5e7eb;
+  border-radius:20px;
+  padding:16px;
+  min-height:260px;
+  max-height:clamp(300px, 58vh, 560px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  white-space:pre-wrap;
+  word-break:break-word;
+  line-height:1.55;
+  font-size:12.5px;
+}
+
+.preview-box::-webkit-scrollbar{
+  width:8px;
+}
+
+.preview-box::-webkit-scrollbar-track{
+  background:rgba(255,255,255,0.06);
+  border-radius:999px;
+}
+
+.preview-box::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,0.24);
+  border-radius:999px;
+}
+
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0,1fr));
+  gap:12px;
+}
+
+.summary-stat{
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:16px;
+  background:#fff;
+}
+
+.summary-stat-label{
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  font-weight:900;
+  color:var(--muted);
+}
+
+.summary-stat-value{
+  margin-top:8px;
+  font-size:28px;
+  font-weight:950;
+  line-height:1;
+}
+
+.summary-stat-note{
+  margin-top:6px;
+  font-size:10.5px;
+  color:#6b7280;
+}
+
+.summary-total .summary-stat-value{
+  color:#111827;
+}
+
+.summary-tally .summary-stat-value,
+.summary-excess .summary-stat-value{
+  color:#166534;
+}
+
+.summary-shortage .summary-stat-value{
+  color:#991b1b;
+}
+
+.item-summary-list{
+  display:grid;
+  gap:12px;
+}
+
+.item-summary{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  background:#fafafa;
+}
+
+.item-summary h4{
+  margin:0 0 8px;
+  font-size:13px;
+  line-height:1.4;
+}
+
+.item-summary p{
+  margin:4px 0;
+  font-size:12px;
+  color:#374151;
+  line-height:1.5;
+}
+
+.tag{
+  display:inline-flex;
+  align-items:center;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:11.5px;
+  font-weight:800;
+}
+
+.tag-ok{
+  background:#ecfdf5;
+  color:#166534;
+}
+
+.tag-bad{
+  background:#fef2f2;
+  color:#991b1b;
+}
+
+.sticky-bar{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:100;
+  background:rgba(8,8,12,0.86);
+  backdrop-filter:blur(16px);
+  border-top:1px solid rgba(255,255,255,0.06);
+  padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+}
+
+.sticky-inner{
+  width:min(100%, 1220px);
+  margin:0 auto;
+}
+
+.action-single,
+.action-double{
+  display:grid;
+  gap:10px;
+}
+
+.action-double{
+  grid-template-columns:repeat(2, minmax(0,1fr));
+}
+
+.note{
+  margin-top:7px;
+  text-align:center;
+  color:rgba(255,255,255,0.62);
+  font-size:10px;
+  line-height:1.4;
+}
+
+@media(max-width:980px){
+  .layout{
+    grid-template-columns:1fr;
+  }
+
+  .summary-grid{
+    grid-template-columns:repeat(2, minmax(0,1fr));
+  }
+}
+
+@media(max-width:640px){
+  .shell{
+    padding:10px 10px 108px;
+  }
+
+  .hero{
+    padding:12px;
+    border-radius:20px;
+    margin-bottom:12px;
+  }
+
+  .logo-box{
+    min-height:78px;
+    border-radius:16px;
+    padding:8px;
+  }
+
+  .logo-box img{
+    max-height:105px;
+  }
+
+  .hero-copy{
+    margin-top:10px;
+  }
+
+  .hero-copy h1{
+    font-size:22px;
+  }
+
+  .hero-copy p{
+    font-size:11px;
+  }
+
+  .layout,
+  .stack{
+    gap:12px;
+  }
+
+  .card{
+    border-radius:18px;
+  }
+
+  .card-head{
+    padding:14px 14px 0;
+  }
+
+  .card-title{
+    font-size:10.5px;
+  }
+
+  .card-body{
+    padding:14px;
+  }
+
+  .grid-2,
+  .grid-3,
+  .summary-grid,
+  .action-double{
+    grid-template-columns:1fr;
+  }
+
+  input,
+  select{
+    height:46px;
+    font-size:14px;
+  }
+
+  .items-head{
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+  }
+
+  .item-top{
+    flex-direction:row;
+    align-items:center;
+    justify-content:space-between;
+  }
+
+  .diff-box,
+  .status-box{
+    height:44px;
+    font-size:12.5px;
+  }
+
+  .preview-box{
+    font-size:12px;
+    min-height:230px;
+    max-height:48vh;
+  }
+
+  .primary-btn,
+  .secondary-btn,
+  .whatsapp-btn,
+  .edit-btn{
+    font-size:13px;
+    padding:13px 14px;
+  }
+}
+
+@media(max-width:360px){
+  .report-info-grid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app" id="stockApp">
+  <div class="shell">
+
+    <section class="hero">
+      <div class="logo-box">
+        <img
+          src="../mr-vapor-logo.png"
+          alt="MR Vapor Logo"
+          onerror="this.style.display='none'; document.getElementById('stockLogoFallback').style.display='block';"
+        >
+        <div id="stockLogoFallback" class="logo-fallback">MR VAPOR</div>
+      </div>
+
+      <div class="hero-copy">
+        <h1 id="stockHeroTitle">Stock Check Report</h1>
+        <p id="stockHeroCaption">
+          A responsive stock checking module designed for efficient item verification between on hand quantity and system inventory quantity.
+        </p>
+      </div>
+    </section>
+
+    <div id="stockFormPage">
+      <div class="layout">
+
+        <div class="stack">
+          <section class="card">
+            <div class="card-head">
+              <h3 class="card-title">Report Information</h3>
+            </div>
+
+            <div class="card-body">
+              <div class="report-info-grid">
+                <div class="field">
+                  <label for="stockOutlet">Outlet</label>
+                  <select id="stockOutlet">
+                    <option value="">Select Outlet</option>
+                    <option value="C180">C180</option>
+                    <option value="BALAKONG">BALAKONG</option>
+                    <option value="BMC">BMC</option>
+                    <option value="PRIMA SAUJANA">PRIMA SAUJANA</option>
+                    <option value="BANGI SEK 8">BANGI SEK 8</option>
+                    <option value="BANGI SEK 9">BANGI SEK 9</option>
+                    <option value="SEMENYIH PELANGI">SEMENYIH PELANGI</option>
+                    <option value="SEMENYIH CLC">SEMENYIH CLC</option>
+                    <option value="AMPANG">AMPANG</option>
+                    <option value="SG. BESI">SG. BESI</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="stockCheckedBy">Checked By</label>
+                  <input id="stockCheckedBy" type="text" placeholder="Checked By">
+                </div>
+              </div>
+
+              <div class="report-info-grid">
+                <div class="field">
+                  <label for="stockAutoDate">Date</label>
+                  <input id="stockAutoDate" readonly>
+                </div>
+
+                <div class="field">
+                  <label for="stockAutoTime">Time</label>
+                  <input id="stockAutoTime" readonly>
+                </div>
+              </div>
+
+              <div class="helper-text">
+                Status guide: <strong>✅ Tally</strong> for same quantity, <strong>❌ Excess</strong> if On Hand is higher, and <strong>❌ Shortage</strong> if On Hand is lower.
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="stack">
+          <section class="card">
+            <div class="card-head">
+              <h3 class="card-title">Checklist Item</h3>
+            </div>
+
+            <div class="card-body">
+              <div class="items-head">
+                <div class="helper-text">
+                  Fill Barcode, Item Name, On Hand Qty, and System Inventory Qty. Difference and status will update automatically.
+                </div>
+
+                <button id="stockAddItemBtn" class="secondary-btn" type="button">+ Add Item</button>
+              </div>
+
+              <div id="stockEmptyItemNote" class="empty-item">
+                No checklist item added yet.
+              </div>
+
+              <div id="stockList" class="item-list"></div>
+            </div>
+          </section>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="stockSummaryPage" class="hidden">
+      <div class="summary-stack">
+
+        <section class="card">
+          <div class="card-head">
+            <h3 class="card-title">WhatsApp Preview</h3>
+          </div>
+          <div class="card-body">
+            <div id="stockSummaryText" class="preview-box"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h3 class="card-title">Stock Check Summary</h3>
+          </div>
+          <div class="card-body">
+            <div class="summary-grid">
+              <div class="summary-stat summary-total">
+                <div class="summary-stat-label">Total Item</div>
+                <div id="stockStatTotal" class="summary-stat-value">0</div>
+                <div class="summary-stat-note">Items checked</div>
+              </div>
+
+              <div class="summary-stat summary-tally">
+                <div class="summary-stat-label">Tally</div>
+                <div id="stockStatTally" class="summary-stat-value">0</div>
+                <div class="summary-stat-note">Matched items</div>
+              </div>
+
+              <div class="summary-stat summary-excess">
+                <div class="summary-stat-label">Excess</div>
+                <div id="stockStatExcess" class="summary-stat-value">0</div>
+                <div class="summary-stat-note">Positive difference</div>
+              </div>
+
+              <div class="summary-stat summary-shortage">
+                <div class="summary-stat-label">Shortage</div>
+                <div id="stockStatShortage" class="summary-stat-value">0</div>
+                <div class="summary-stat-note">Negative difference</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h3 class="card-title">Item Summary</h3>
+          </div>
+          <div id="stockItemSummaryList" class="card-body item-summary-list"></div>
+        </section>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sticky-bar">
+    <div class="sticky-inner">
+      <div id="stockFormActions" class="action-single">
+        <button id="stockGenerateBtn" class="primary-btn" type="button">Generate Report</button>
+        <div class="note">After generating, a summary will be shown before sharing to WhatsApp.</div>
+      </div>
+
+      <div id="stockSummaryActions" class="action-double hidden">
+        <button id="stockShareBtn" class="whatsapp-btn" type="button">Share WhatsApp</button>
+        <button id="stockEditBtn" class="edit-btn" type="button">Edit Report</button>
+      </div>
+    </div>
+  </div>
+
+  <textarea id="stockOutput" style="display:none;"></textarea>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  const stockEls = {};
+
+  function stockGetEl(id){
+    return document.getElementById(id);
+  }
+
+  function stockCacheEls(){
+    stockEls.formPage = stockGetEl('stockFormPage');
+    stockEls.summaryPage = stockGetEl('stockSummaryPage');
+    stockEls.outlet = stockGetEl('stockOutlet');
+    stockEls.checkedBy = stockGetEl('stockCheckedBy');
+    stockEls.autoDate = stockGetEl('stockAutoDate');
+    stockEls.autoTime = stockGetEl('stockAutoTime');
+    stockEls.stockList = stockGetEl('stockList');
+    stockEls.emptyItemNote = stockGetEl('stockEmptyItemNote');
+    stockEls.summaryText = stockGetEl('stockSummaryText');
+    stockEls.output = stockGetEl('stockOutput');
+    stockEls.formActions = stockGetEl('stockFormActions');
+    stockEls.summaryActions = stockGetEl('stockSummaryActions');
+    stockEls.heroTitle = stockGetEl('stockHeroTitle');
+    stockEls.heroCaption = stockGetEl('stockHeroCaption');
+    stockEls.statTotal = stockGetEl('stockStatTotal');
+    stockEls.statTally = stockGetEl('stockStatTally');
+    stockEls.statExcess = stockGetEl('stockStatExcess');
+    stockEls.statShortage = stockGetEl('stockStatShortage');
+    stockEls.itemSummaryList = stockGetEl('stockItemSummaryList');
+    stockEls.addItemBtn = stockGetEl('stockAddItemBtn');
+    stockEls.generateBtn = stockGetEl('stockGenerateBtn');
+    stockEls.shareBtn = stockGetEl('stockShareBtn');
+    stockEls.editBtn = stockGetEl('stockEditBtn');
+  }
+
+  function stockPad(num){
+    return String(num).padStart(2, '0');
+  }
+
+  function stockFormatDate(d){
+    return stockPad(d.getDate()) + '.' + stockPad(d.getMonth() + 1) + '.' + d.getFullYear();
+  }
+
+  function stockFormatTime(d){
+    return stockPad(d.getHours()) + ':' + stockPad(d.getMinutes());
+  }
+
+  function stockSetAutoDateTime(){
+    const now = new Date();
+    stockEls.autoDate.value = stockFormatDate(now);
+    stockEls.autoTime.value = stockFormatTime(now);
+  }
+
+  function stockEscapeHtml(str){
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function stockOnlyDigits(value){
+    return String(value || '').replace(/\D/g, '');
+  }
+
+  function stockParseQty(value){
+    const clean = stockOnlyDigits(value);
+    return clean === '' ? 0 : parseInt(clean, 10);
+  }
+
+  function stockGetDiffDisplay(diff){
+    return diff > 0 ? '+' + diff : String(diff);
+  }
+
+  function stockGetStatus(diff){
+    if(diff === 0){
+      return '✅ Tally';
+    }
+
+    if(diff > 0){
+      return '❌ Excess (' + stockGetDiffDisplay(diff) + ')';
+    }
+
+    return '❌ Shortage (' + stockGetDiffDisplay(diff) + ')';
+  }
+
+  function stockGetItemCards(){
+    return Array.from(stockEls.stockList.querySelectorAll('.item-card'));
+  }
+
+  function stockRefreshItemIndexes(){
+    const cards = stockGetItemCards();
+
+    cards.forEach(function(card, index){
+      const title = card.querySelector('.item-index');
+
+      if(title){
+        title.textContent = 'Item ' + (index + 1);
+      }
+    });
+
+    if(cards.length === 0){
+      stockEls.emptyItemNote.classList.remove('hidden');
+    }else{
+      stockEls.emptyItemNote.classList.add('hidden');
+    }
+  }
+
+  function stockCalculateCard(card){
+    const onHandInput = card.querySelector('.stock-onhand');
+    const systemInput = card.querySelector('.stock-system');
+    const diffBox = card.querySelector('.diff-box');
+    const statusBox = card.querySelector('.status-box');
+
+    onHandInput.value = stockOnlyDigits(onHandInput.value);
+    systemInput.value = stockOnlyDigits(systemInput.value);
+
+    if(onHandInput.value === '' || systemInput.value === ''){
+      diffBox.textContent = '-';
+      diffBox.className = 'diff-box';
+      statusBox.textContent = 'Pending';
+      statusBox.className = 'status-box';
+      return;
+    }
+
+    const onHand = stockParseQty(onHandInput.value);
+    const systemQty = stockParseQty(systemInput.value);
+    const diff = onHand - systemQty;
+
+    diffBox.textContent = stockGetDiffDisplay(diff);
+    diffBox.className = 'diff-box';
+
+    statusBox.textContent = stockGetStatus(diff);
+    statusBox.className = 'status-box';
+
+    if(diff === 0){
+      diffBox.classList.add('diff-zero');
+      statusBox.classList.add('status-ok');
+    }else if(diff > 0){
+      diffBox.classList.add('diff-pos');
+      statusBox.classList.add('status-bad');
+    }else{
+      diffBox.classList.add('diff-neg');
+      statusBox.classList.add('status-bad');
+    }
+  }
+
+  function stockCreateItem(){
+    const card = document.createElement('div');
+    card.className = 'item-card';
+
+    card.innerHTML = `
+      <div class="item-top">
+        <div class="item-index">Item</div>
+        <button type="button" class="remove-btn" aria-label="Remove" title="Remove">×</button>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label>Barcode</label>
+          <input type="text" class="stock-barcode" placeholder="Barcode">
+        </div>
+
+        <div class="field">
+          <label>Item Name</label>
+          <input type="text" class="stock-item-name" placeholder="Item Name">
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="field">
+          <label>On Hand Qty</label>
+          <input type="text" class="stock-onhand qty-input" inputmode="numeric" placeholder="0">
+        </div>
+
+        <div class="field">
+          <label>System Inventory Qty</label>
+          <input type="text" class="stock-system qty-input" inputmode="numeric" placeholder="0">
+        </div>
+
+        <div class="field">
+          <label>Difference</label>
+          <div class="diff-box">-</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Status</label>
+        <div class="status-box">Pending</div>
+      </div>
+    `;
+
+    const barcodeInput = card.querySelector('.stock-barcode');
+    const itemNameInput = card.querySelector('.stock-item-name');
+    const onHandInput = card.querySelector('.stock-onhand');
+    const systemInput = card.querySelector('.stock-system');
+
+    card.querySelector('.remove-btn').addEventListener('click', function(){
+      card.remove();
+      stockRefreshItemIndexes();
+    });
+
+    onHandInput.addEventListener('input', function(){
+      stockCalculateCard(card);
+    });
+
+    systemInput.addEventListener('input', function(){
+      stockCalculateCard(card);
+    });
+
+    barcodeInput.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        itemNameInput.focus();
+      }
+    });
+
+    itemNameInput.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        onHandInput.focus();
+      }
+    });
+
+    onHandInput.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        systemInput.focus();
+      }
+    });
+
+    systemInput.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        stockCreateItem();
+      }
+    });
+
+    stockEls.stockList.appendChild(card);
+    stockRefreshItemIndexes();
+
+    setTimeout(function(){
+      barcodeInput.focus();
+    }, 80);
+  }
+
+  function stockGetChecklistItems(){
+    const cards = stockGetItemCards();
+    const items = [];
+
+    cards.forEach(function(card){
+      const barcode = card.querySelector('.stock-barcode').value.trim();
+      const itemName = card.querySelector('.stock-item-name').value.trim();
+      const onHandInput = card.querySelector('.stock-onhand').value.trim();
+      const systemInput = card.querySelector('.stock-system').value.trim();
+
+      if(barcode || itemName || onHandInput || systemInput){
+        const onHandQty = stockParseQty(onHandInput);
+        const systemQty = stockParseQty(systemInput);
+        const difference = onHandQty - systemQty;
+
+        items.push({
+          barcode: barcode,
+          itemName: itemName,
+          onHandInput: onHandInput,
+          systemInput: systemInput,
+          onHandQty: onHandQty,
+          systemQty: systemQty,
+          difference: difference,
+          status: stockGetStatus(difference)
+        });
+      }
+    });
+
+    return items;
+  }
+
+  function stockValidateForm(){
+    const outlet = stockEls.outlet.value.trim();
+    const checkedBy = stockEls.checkedBy.value.trim();
+    const items = stockGetChecklistItems();
+
+    if(!outlet){
+      alert('Please select outlet.');
+      return false;
+    }
+
+    if(!checkedBy){
+      alert('Please enter Checked By.');
+      return false;
+    }
+
+    if(items.length === 0){
+      alert('Please add at least one checklist item.');
+      return false;
+    }
+
+    for(let i = 0; i < items.length; i++){
+      if(!items[i].barcode){
+        alert('Please fill in Barcode for item ' + (i + 1) + '.');
+        return false;
+      }
+
+      if(!items[i].itemName){
+        alert('Please fill in Item Name for item ' + (i + 1) + '.');
+        return false;
+      }
+
+      if(items[i].onHandInput === ''){
+        alert('Please fill in On Hand Qty for item ' + (i + 1) + '.');
+        return false;
+      }
+
+      if(items[i].systemInput === ''){
+        alert('Please fill in System Inventory Qty for item ' + (i + 1) + '.');
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function stockBuildWhatsappText(data){
+    let text =
+`MR. VAPOR | STOCK CHECK REPORT
+
+Outlet: ${data.outlet}
+Date: ${data.date}
+Time: ${data.time}
+
+OH & System Check-In
+Status: ✅ Tally / ❌ Excess-Shortage
+
+• Checklist Item
+
+`;
+
+    data.items.forEach(function(item){
+      text +=
+`${item.barcode} • ${item.itemName}
+On Hand Qty:${item.onHandQty}
+System Inventory Qty:${item.systemQty}
+Difference:${stockGetDiffDisplay(item.difference)}
+Status:${item.status}
+
+`;
+    });
+
+    text += `Checked By: ${data.checkedBy}`;
+
+    return text;
+  }
+
+  function stockRenderSummary(items){
+    const total = items.length;
+    const tally = items.filter(function(item){ return item.difference === 0; }).length;
+    const excess = items.filter(function(item){ return item.difference > 0; }).length;
+    const shortage = items.filter(function(item){ return item.difference < 0; }).length;
+
+    stockEls.statTotal.textContent = total;
+    stockEls.statTally.textContent = tally;
+    stockEls.statExcess.textContent = excess;
+    stockEls.statShortage.textContent = shortage;
+
+    let html = '';
+
+    items.forEach(function(item, index){
+      const isTally = item.difference === 0;
+
+      html += `
+        <div class="item-summary">
+          <h4>${index + 1}. ${stockEscapeHtml(item.barcode)} • ${stockEscapeHtml(item.itemName)}</h4>
+          <p><strong>On Hand Qty:</strong> ${item.onHandQty}</p>
+          <p><strong>System Inventory Qty:</strong> ${item.systemQty}</p>
+          <p><strong>Difference:</strong> ${stockGetDiffDisplay(item.difference)}</p>
+          <p><span class="tag ${isTally ? 'tag-ok' : 'tag-bad'}">${stockEscapeHtml(item.status)}</span></p>
+        </div>
+      `;
+    });
+
+    stockEls.itemSummaryList.innerHTML = html;
+  }
+
+  function stockGenerateReport(){
+    if(!stockValidateForm()){
+      return;
+    }
+
+    stockSetAutoDateTime();
+
+    const data = {
+      outlet: stockEls.outlet.value.trim(),
+      checkedBy: stockEls.checkedBy.value.trim(),
+      date: stockEls.autoDate.value,
+      time: stockEls.autoTime.value,
+      items: stockGetChecklistItems()
+    };
+
+    const whatsappText = stockBuildWhatsappText(data);
+
+    stockRenderSummary(data.items);
+
+    stockEls.summaryText.textContent = whatsappText;
+    stockEls.output.value = whatsappText;
+
+    stockEls.formPage.classList.add('hidden');
+    stockEls.summaryPage.classList.remove('hidden');
+
+    stockEls.formActions.classList.add('hidden');
+    stockEls.summaryActions.classList.remove('hidden');
+
+    stockEls.heroTitle.classList.add('hidden');
+    stockEls.heroCaption.textContent = 'Summary generated successfully. Please review before sharing to WhatsApp.';
+
+    window.scrollTo({
+      top:0,
+      behavior:'smooth'
+    });
+  }
+
+  function stockEditReport(){
+    stockEls.summaryPage.classList.add('hidden');
+    stockEls.formPage.classList.remove('hidden');
+
+    stockEls.summaryActions.classList.add('hidden');
+    stockEls.formActions.classList.remove('hidden');
+
+    stockEls.heroTitle.classList.remove('hidden');
+    stockEls.heroTitle.textContent = 'Stock Check Report';
+    stockEls.heroCaption.textContent = 'A responsive stock checking module designed for efficient item verification between on hand quantity and system inventory quantity.';
+
+    window.scrollTo({
+      top:0,
+      behavior:'smooth'
+    });
+  }
+
+  function stockShareWhatsapp(){
+    const text = stockEls.output.value;
+
+    if(!text){
+      alert('Generate report first.');
+      return;
+    }
+
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    stockCacheEls();
+    stockSetAutoDateTime();
+    stockRefreshItemIndexes();
+
+    stockEls.addItemBtn.addEventListener('click', stockCreateItem);
+    stockEls.generateBtn.addEventListener('click', stockGenerateReport);
+    stockEls.editBtn.addEventListener('click', stockEditReport);
+    stockEls.shareBtn.addEventListener('click', stockShareWhatsapp);
+  });
+})();
+</script>
+
+</body>
+</html>
